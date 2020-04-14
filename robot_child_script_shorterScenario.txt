@@ -1,0 +1,65 @@
+function sysCall_threadmain()
+    -- START OF PATH INPUTS FROM MATLAB --
+x_vals={-4,-3.945,-3.7609,-3.5708,-3.5008,-3.5008,-3.4458,-3.3758,-3.3208,-3.0875,-2.9034,-2.6004,-2.2974,-2.152,-2.0113,-1.7083,-1.4053,-1.2599,-1.1192,-0.97385,-0.74284,-0.6248,-0.51898,-0.40095,-0.29513,-0.064119};
+y_vals={-3,-2.8613,-2.7695,-2.691,-2.5592,-2.2528,-2.1141,-1.9823,-1.8436,-1.6449,-1.5532,-1.5078,-1.4623,-1.4962,-1.5458,-1.5004,-1.455,-1.4888,-1.5385,-1.5723,-1.7736,-1.9421,-2.1184,-2.2869,-2.4633,-2.6646};
+left_vels={0,14,14,5,0,14,14,0,14,14,14,14,14,14,0,14,14,14,0,14,14,14,5,14,5,14};
+right_vels={0,0,5,14,14,14,0,14,0,14,5,14,14,0,14,14,14,0,14,0,14,5,14,5,14,14};
+orientations={1.5708,0.70523,0.1488,0.70523,1.5708,1.5708,0.70523,1.5708,0.70523,0.70523,0.1488,0.1488,0.1488,5.5664,0.1488,0.1488,0.1488,5.5664,0.1488,5.5664,5.5664,5.01,5.5664,5.01,5.5664,5.5664};
+    -- END OF PATH INPUTS FROM MATLAB --
+    
+    
+    -- Put some initialization code here
+    leftMotor=sim.getObjectHandle("Pioneer_p3dx_leftMotor");
+    rightMotor=sim.getObjectHandle("Pioneer_p3dx_rightMotor");
+    robot=sim.getObjectHandle("Pioneer_p3dx");
+    i=2;
+    nn=table.getn(left_vels);
+    for k=1,nn do
+        --left_vels[k]=left_vels[k]*(0.238761042/60)*1;
+        --right_vels[k]=right_vels[k]*(0.238761042/60)*1;
+        left_vels[k]=left_vels[k]*(0.01)*1;
+        right_vels[k]=right_vels[k]*(0.01)*1;        
+        x_vals[k]=x_vals[k]/2;
+        y_vals[k]=y_vals[k]/2;
+    end
+    
+    sim.setJointTargetVelocity(leftMotor,left_vels[2]);
+    sim.setJointTargetVelocity(rightMotor,right_vels[2]);
+    closeEnough=0;
+    
+    while closeEnough == 0 do
+        curPos=sim.getObjectPosition(robot,-1);
+        distance=math.sqrt(((curPos[1]-x_vals[i])^2)+((curPos[2]-y_vals[i])^2));
+        distance_to_goal=math.sqrt(((curPos[1]-x_vals[nn])^2)+((curPos[2]-y_vals[nn])^2));
+        
+        if distance_to_goal <= 0.2 then
+            sim.setJointTargetVelocity(leftMotor,0);
+            sim.setJointTargetVelocity(rightMotor,0);
+            --closeEnough=1;
+        else
+        end
+        
+        if curPos[1]>-1 then
+            if distance <= 0.09 then
+                sim.setJointTargetVelocity(leftMotor,left_vels[i]);
+                sim.setJointTargetVelocity(rightMotor,right_vels[i]);
+                i=i+1;
+            else
+            end
+        else
+            if distance <= 0.09 then
+                sim.setJointTargetVelocity(leftMotor,left_vels[i]);
+                sim.setJointTargetVelocity(rightMotor,right_vels[i]);
+                i=i+1;
+            else
+            end
+        end
+
+    end
+end
+
+function sysCall_cleanup()
+    -- Put some clean-up code here
+end
+
+-- See the user manual or the available code snippets for additional callback functions and details

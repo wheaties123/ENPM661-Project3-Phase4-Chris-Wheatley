@@ -1,0 +1,65 @@
+function sysCall_threadmain()
+    -- START OF PATH INPUTS FROM MATLAB --
+x_vals={-4,-3.945,-3.7116,-3.6417,-3.5867,-3.5167,-3.4673,-3.3054,-3.158,-2.8832,-2.6083,-2.3335,-2.0586,-1.7838,-1.6837,-1.6087,-1.5337,-1.4587,-1.4781,-1.6557,-1.7311,-1.6847,-1.4641,-1.4025,-1.3561,-1.1781,-0.99316,-0.81511,-0.51547,-0.21583,0.083809,0.38345,0.5306,0.67413,0.82128,1.0643,1.2078,1.355,1.4985,1.7981,1.9453,2.0888,2.236,2.3795,2.6791,2.9788,3.1029,3.2172,3.3413,3.4868,3.6322,3.7777,3.7951};
+y_vals={-3,-2.8613,-2.6627,-2.5309,-2.3921,-2.2603,-2.0607,-1.8005,-1.6571,-1.5216,-1.3862,-1.2507,-1.1152,-0.97978,-0.86909,-0.572,-0.27492,0.022171,0.17013,0.41982,0.61118,0.75302,0.96568,1.1016,1.2434,1.3464,1.4365,1.5394,1.6035,1.6675,1.7316,1.7957,1.7709,1.73,1.7052,1.5186,1.4777,1.4529,1.412,1.4761,1.4513,1.4104,1.3856,1.3448,1.4088,1.4729,1.5557,1.6517,1.7345,2.0042,2.2739,2.5436,2.6918};
+left_vels={0,14,14,0,14,0,14,14,14,14,14,14,14,14,0,14,14,14,0,14,14,14,14,0,14,14,5,14,14,14,14,14,14,0,14,14,0,14,0,14,14,0,14,0,14,14,0,14,0,14,14,14,0};
+right_vels={0,0,14,14,0,14,5,14,5,14,14,14,14,14,14,14,14,14,14,14,5,0,14,14,0,5,14,5,14,14,14,14,0,14,0,14,14,0,14,14,0,14,0,14,14,14,14,0,14,14,14,14,14};
+orientations={1.5708,0.70523,0.70523,1.5708,0.70523,1.5708,1.0144,1.0144,0.45793,0.45793,0.45793,0.45793,0.45793,0.45793,1.3235,1.3235,1.3235,1.3235,2.1891,2.1891,1.6326,0.76706,0.76706,1.6326,0.76706,0.21062,0.76706,0.21062,0.21062,0.21062,0.21062,0.21062,5.6282,0.21062,5.6282,5.6282,0.21062,5.6282,0.21062,0.21062,5.6282,0.21062,5.6282,0.21062,0.21062,0.21062,1.0762,0.21062,1.0762,1.0762,1.0762,1.0762,1.9418};
+    -- END OF PATH INPUTS FROM MATLAB --
+    
+    
+    -- Put some initialization code here
+    leftMotor=sim.getObjectHandle("Pioneer_p3dx_leftMotor");
+    rightMotor=sim.getObjectHandle("Pioneer_p3dx_rightMotor");
+    robot=sim.getObjectHandle("Pioneer_p3dx");
+    i=2;
+    nn=table.getn(left_vels);
+    for k=1,nn do
+        --left_vels[k]=left_vels[k]*(0.238761042/60)*1;
+        --right_vels[k]=right_vels[k]*(0.238761042/60)*1;
+        left_vels[k]=left_vels[k]*(0.01)*1;
+        right_vels[k]=right_vels[k]*(0.01)*1;        
+        x_vals[k]=x_vals[k]/2;
+        y_vals[k]=y_vals[k]/2;
+    end
+    
+    sim.setJointTargetVelocity(leftMotor,left_vels[2]);
+    sim.setJointTargetVelocity(rightMotor,right_vels[2]);
+    closeEnough=0;
+    
+    while closeEnough == 0 do
+        curPos=sim.getObjectPosition(robot,-1);
+        distance=math.sqrt(((curPos[1]-x_vals[i])^2)+((curPos[2]-y_vals[i])^2));
+        distance_to_goal=math.sqrt(((curPos[1]-x_vals[nn])^2)+((curPos[2]-y_vals[nn])^2));
+        
+        if distance_to_goal <= 0.45 then
+            sim.setJointTargetVelocity(leftMotor,0);
+            sim.setJointTargetVelocity(rightMotor,0);
+            --closeEnough=1;
+        else
+        end
+        
+        if curPos[1]>-1 then
+            if distance <= 0.3 then
+                sim.setJointTargetVelocity(leftMotor,left_vels[i]);
+                sim.setJointTargetVelocity(rightMotor,right_vels[i]);
+                i=i+1;
+            else
+            end
+        else
+            if distance <= 0.3 then
+                sim.setJointTargetVelocity(leftMotor,left_vels[i]);
+                sim.setJointTargetVelocity(rightMotor,right_vels[i]);
+                i=i+1;
+            else
+            end
+        end
+
+    end
+end
+
+function sysCall_cleanup()
+    -- Put some clean-up code here
+end
+
+-- See the user manual or the available code snippets for additional callback functions and details
